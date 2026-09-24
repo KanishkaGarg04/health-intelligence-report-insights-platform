@@ -1,13 +1,20 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import axios from "axios";
+import { Link } from "react-router-dom";
 import {
-  Home,
+  LayoutDashboard,
+  FilePlus,
   Clock,
   User,
   Bot,
   LogOut,
   Moon,
   Sun,
+  Menu,
+  X,
+  ExternalLink,
+  FileText,
+  ShieldCheck,
 } from "lucide-react";
 import AIHealthSummary from "./AIHealthSummary";
 import RecentActivity from "./RecentActivity";
@@ -18,9 +25,10 @@ import UploadView from "./UploadView";
 import HistoryView from "./HistoryView";
 import ChatbotView from "./ChatbotView";
 import ProfileView from "./ProfileView";
+import { PlatformLogo } from "./common/UIComponents";
 
 export default function Dashboard() {
-  const [activeTab, setActiveTab] = useState("home");
+  const [activeTab, setActiveTab] = useState("overview");
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [darkMode, setDarkMode] = useState(
     () => localStorage.getItem("theme") === "dark"
@@ -35,7 +43,6 @@ export default function Dashboard() {
   });
 
   // ================= Fetch Reports =================
-
   const fetchReports = async () => {
     try {
       const token = localStorage.getItem("token");
@@ -51,35 +58,50 @@ export default function Dashboard() {
 
       setReports(res.data.data || res.data || []);
     } catch (err) {
-      console.error(
-        "Failed fetching database history collection records:",
-        err
-      );
+      console.error("Failed fetching database history records:", err);
     }
   };
 
   // ================= Initial Load =================
-
   useEffect(() => {
-    fetchReports();
+    let ignore = false;
+
+    const loadData = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        const res = await axios.get(
+          `${import.meta.env.VITE_API_URL}/api/reports/history`,
+          {
+            headers: {
+              Authorization: token,
+            },
+          }
+        );
+        if (!ignore) {
+          setReports(res.data.data || res.data || []);
+        }
+      } catch (err) {
+        console.error("Failed fetching database history records:", err);
+      }
+    };
+
+    loadData();
 
     const syncUser = () => {
       const saved = localStorage.getItem("user");
-
       if (saved) {
         setUser(JSON.parse(saved));
       }
     };
 
     window.addEventListener("storage", syncUser);
-
     return () => {
+      ignore = true;
       window.removeEventListener("storage", syncUser);
     };
   }, []);
 
   // ================= Dark Mode =================
-
   useEffect(() => {
     if (darkMode) {
       document.documentElement.classList.add("dark");
@@ -91,212 +113,269 @@ export default function Dashboard() {
   }, [darkMode]);
 
   // ================= Logout =================
-
   const handleLogout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
-
     window.location.href = "/login";
   };
 
+  const navItems = [
+    { id: "overview", label: "Overview", icon: LayoutDashboard },
+    { id: "analyze", label: "Analyze Report", icon: FilePlus },
+    { id: "history", label: "Report History", icon: Clock },
+    { id: "chatbot", label: "AI Assistant", icon: Bot },
+    { id: "profile", label: "User Profile", icon: User },
+  ];
+
+  // User initials
+  const initials = user?.name
+    ? user.name
+        .split(" ")
+        .map((w) => w[0])
+        .join("")
+        .toUpperCase()
+        .slice(0, 2)
+    : "U";
+
   return (
-  <div className="flex min-h-screen bg-[#f7fafd] dark:bg-slate-900 text-slate-700 dark:text-white">
-
-    {/* Sidebar */}
-    <aside
-className={`
-fixed z-50 top-0 left-0 h-screen w-72
-bg-white dark:bg-slate-800
-border-r border-slate-100 dark:border-slate-700
-flex flex-col justify-between p-6
-transition-transform duration-300
-
-${sidebarOpen ? "translate-x-0" : "-translate-x-full"}
-
-md:translate-x-0
-`}
->
-
-      <div>
-
-        {/* Logo */}
-        <div className="flex items-center gap-3 mb-10">
-          <div className="w-11 h-11 rounded-xl bg-gradient-to-r from-teal-500 to-blue-600 flex items-center justify-center text-white">
-            <svg
-              className="w-6 h-6 stroke-white fill-none"
-              viewBox="0 0 24 24"
-              strokeWidth="2.2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
+    <div className="flex min-h-screen bg-[#fafbfe] dark:bg-slate-950 text-slate-800 dark:text-slate-100 antialiased font-sans">
+      {/* ================= SIDEBAR ================= */}
+      <aside
+        className={`fixed z-50 top-0 left-0 h-screen w-64 bg-white dark:bg-slate-900 border-r border-slate-200/80 dark:border-slate-800 flex flex-col justify-between p-5 transition-transform duration-300 ${
+          sidebarOpen ? "translate-x-0" : "-translate-x-full"
+        } md:translate-x-0`}
+      >
+        <div>
+          {/* Logo Header */}
+          <div className="flex items-center justify-between mb-8 pb-4 border-b border-slate-100 dark:border-slate-800">
+            <PlatformLogo />
+            <button
+              onClick={() => setSidebarOpen(false)}
+              className="md:hidden text-slate-400 hover:text-slate-600 p-1"
             >
-              <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
-            </svg>
+              <X size={18} />
+            </button>
           </div>
 
-          <div>
-            <h1 className="text-xl font-bold">MedScan</h1>
-            <p className="text-xs text-slate-400">Report Analyzer</p>
+          {/* Navigation Matrix */}
+          <nav className="space-y-1">
+            {navItems.map(({ id, label, icon: Icon }) => {
+              const active =
+                activeTab === id ||
+                (id === "overview" && activeTab === "home") ||
+                (id === "chatbot" && activeTab === "copilot");
+
+              return (
+                <button
+                  key={id}
+                  onClick={() => {
+                    setActiveTab(id);
+                    setSidebarOpen(false);
+                  }}
+                  className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all duration-150 cursor-pointer ${
+                    active
+                      ? "bg-slate-900 text-white dark:bg-teal-600 shadow-xs"
+                      : "text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/60"
+                  }`}
+                >
+                  <Icon size={16} className="shrink-0" />
+                  <span>{label}</span>
+                </button>
+              );
+            })}
+          </nav>
+
+          {/* Link to Public Landing Page */}
+          <div className="pt-4 mt-4 border-t border-slate-100 dark:border-slate-800">
+            <Link
+              to="/"
+              className="w-full flex items-center justify-between px-3.5 py-2 rounded-xl text-[11px] font-medium text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800/40 transition"
+            >
+              <span>Platform Landing</span>
+              <ExternalLink size={12} />
+            </Link>
           </div>
         </div>
 
-        {/* Navigation */}
-        <nav className="space-y-2">
+        {/* Bottom User Area & Utilities */}
+        <div className="space-y-3 pt-4 border-t border-slate-100 dark:border-slate-800">
+          {/* User Card */}
+          <div
+            onClick={() => {
+              setActiveTab("profile");
+              setSidebarOpen(false);
+            }}
+            className="flex items-center gap-3 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/60 p-2 rounded-xl transition"
+          >
+            {user?.profilePic ? (
+              <img
+                src={user.profilePic}
+                alt=""
+                className="w-9 h-9 rounded-xl object-cover border border-slate-200 dark:border-slate-700"
+              />
+            ) : (
+              <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-teal-600 to-blue-600 text-white flex items-center justify-center font-bold text-xs shrink-0 shadow-2xs">
+                {initials}
+              </div>
+            )}
 
-          {[
-            { id: "home", label: "Home", icon: Home },
-            { id: "history", label: "History", icon: Clock },
-            { id: "profile", label: "Profile", icon: User },
-            { id: "chatbot", label: "AI Consultant", icon: Bot },
-          ].map(({ id, label, icon: Icon }) => {
+            <div className="truncate">
+              <h4 className="font-bold text-xs text-slate-900 dark:text-white truncate">
+                {user?.name || "Patient"}
+              </h4>
+              <p className="text-[10px] text-slate-400 truncate">
+                {user?.email || "View account"}
+              </p>
+            </div>
+          </div>
 
-            const active = activeTab === id;
+          {/* Dark Mode Toggle */}
+          <button
+            onClick={() => setDarkMode(!darkMode)}
+            className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/60 transition cursor-pointer"
+          >
+            {darkMode ? <Sun size={15} /> : <Moon size={15} />}
+            <span>{darkMode ? "Light Appearance" : "Dark Appearance"}</span>
+          </button>
 
-            return (
-              <button
-                key={id}
-                onClick={() => {setActiveTab(id); setSidebarOpen(false);}}
-                className={`w-full flex items-center gap-4 px-4 py-3 rounded-xl transition
-                ${
-                  active
-                    ? "bg-gradient-to-r from-teal-500 to-blue-600 text-white"
-                    : "hover:bg-slate-100 dark:hover:bg-slate-700"
-                }`}
-              >
-                <Icon size={20} />
-                {label}
-              </button>
-            );
-          })}
+          {/* Logout */}
+          <button
+            onClick={handleLogout}
+            className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-semibold text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition cursor-pointer"
+          >
+            <LogOut size={15} />
+            <span>Sign Out</span>
+          </button>
+        </div>
+      </aside>
 
-        </nav>
-
-      </div>
-
-      {/* Bottom */}
-      <div className="space-y-4 border-t pt-5 dark:border-slate-700">
-
-        {/* Profile */}
-
+      {/* Mobile Backdrop Overlay */}
+      {sidebarOpen && (
         <div
-          onClick={() => setActiveTab("profile")}
-          className="flex items-center gap-3 cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-700 p-2 rounded-xl"
-        >
+          onClick={() => setSidebarOpen(false)}
+          className="fixed inset-0 bg-slate-950/40 backdrop-blur-2xs z-40 md:hidden"
+        />
+      )}
 
-          {user?.profilePic ? (
-            <img
-              src={user.profilePic}
-              alt=""
-              className="w-11 h-11 rounded-xl object-cover"
-            />
-          ) : (
-            <div className="w-11 h-11 rounded-xl bg-gradient-to-r from-teal-500 to-blue-600 text-white flex items-center justify-center font-bold">
-              {user?.name
-                ?.split(" ")
-                .map((w) => w[0])
-                .join("")
-                .toUpperCase()}
+      {/* ================= MAIN CONTENT VIEWPORT ================= */}
+      <main className="flex-1 w-full md:ml-64 min-h-screen flex flex-col">
+        {/* Top Header Bar */}
+        <header className="sticky top-0 z-30 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border-b border-slate-200/70 dark:border-slate-800 px-4 sm:px-8 h-14 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => setSidebarOpen(true)}
+              className="md:hidden w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-700 dark:text-slate-200 cursor-pointer"
+              aria-label="Open menu"
+            >
+              <Menu size={16} />
+            </button>
+
+            {/* Breadcrumb / Current View Identifier */}
+            <div className="flex items-center gap-2 text-xs font-medium text-slate-500 dark:text-slate-400">
+              <span className="hidden sm:inline">Platform</span>
+              <span className="hidden sm:inline">/</span>
+              <span className="font-bold text-slate-900 dark:text-white capitalize">
+                {activeTab === "home" ? "Overview" : activeTab}
+              </span>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-3">
+            {/* Active Selected Report Pill (Requirement 10) */}
+            {selectedReport && (
+              <div
+                onClick={() => setActiveTab("chatbot")}
+                className="flex items-center gap-1.5 bg-teal-50 dark:bg-teal-950/50 border border-teal-200/80 dark:border-teal-800 text-teal-800 dark:text-teal-300 text-[11px] font-medium px-2.5 py-1 rounded-full cursor-pointer hover:bg-teal-100 transition truncate max-w-[200px]"
+                title="Active report locked in assistant context. Click to chat."
+              >
+                <FileText size={12} className="shrink-0" />
+                <span className="truncate">Active: {selectedReport.fileName}</span>
+              </div>
+            )}
+
+            <div className="hidden sm:flex items-center gap-1.5 text-[11px] text-slate-400 border border-slate-200/60 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/60 px-2.5 py-1 rounded-lg">
+              <ShieldCheck size={12} className="text-teal-600" />
+              <span>Encrypted Session</span>
+            </div>
+          </div>
+        </header>
+
+        {/* Content Area */}
+        <div className="flex-1 p-4 sm:p-8 max-w-6xl w-full mx-auto">
+          {/* TAB 1: OVERVIEW */}
+          {(activeTab === "overview" || activeTab === "home") && (
+            <div className="space-y-6">
+              <StatsCards reports={reports} />
+
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+                <AIHealthSummary reports={reports} />
+                <RecentActivity reports={reports} />
+              </div>
+
+              <AnalyticsCharts reports={reports} />
+
+              <DashboardView reports={reports} />
             </div>
           )}
 
-          <div>
-            <h4 className="font-semibold">{user?.name}</h4>
-            <p className="text-xs text-slate-400">View Profile</p>
-          </div>
+          {/* TAB 2: ANALYZE REPORT */}
+          {activeTab === "analyze" && (
+            <UploadView
+              onUploadComplete={fetchReports}
+              onOpenChatWithReport={(report) => {
+                setSelectedReport(report);
+                setActiveTab("chatbot");
+              }}
+            />
+          )}
 
-        </div>
+          {/* TAB 3: REPORT HISTORY */}
+          {activeTab === "history" && (
+            <HistoryView
+              reports={reports}
+              setSelectedReport={setSelectedReport}
+              setActiveTab={setActiveTab}
+            />
+          )}
 
-        {/* Dark Mode */}
+          {/* TAB 4: CHATBOT / AI CONSULTANT */}
+          {(activeTab === "chatbot" || activeTab === "copilot") && (
+            <ChatbotView
+              reportContext={selectedReport}
+              onClearContext={() => setSelectedReport(null)}
+            />
+          )}
 
-        <button
-          onClick={() => setDarkMode(!darkMode)}
-          className="w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-700"
-        >
-          {darkMode ? <Sun size={18} /> : <Moon size={18} />}
-          {darkMode ? "Light Mode" : "Dark Mode"}
-        </button>
+          {/* TAB 5: PROFILE */}
+          {activeTab === "profile" && <ProfileView reports={reports} />}
 
-        {/* Logout */}
-
-        <button
-          onClick={handleLogout}
-          className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20"
-        >
-          <LogOut size={18} />
-          Logout
-        </button>
-
-      </div>
-
-    </aside>
-           {sidebarOpen && (
-  <div
-    onClick={() => setSidebarOpen(false)}
-    className="fixed inset-0 bg-black/40 z-40 md:hidden"
-  />
-)}
-    {/* Main Content */}
-
-    <main className="flex-1 w-full md:ml-72 p-4 md:p-10 min-h-screen overflow-y-auto transition-colors duration-300">
-          <button
-  onClick={() => setSidebarOpen(true)}
-  className="
-  md:hidden
-  mb-4
-  w-10
-  h-10
-  rounded-xl
-  bg-white
-  dark:bg-slate-800
-  shadow
-  flex
-  items-center
-  justify-center
-  "
->
-  ☰
-</button>
-      {activeTab === "home" && (
-        <div className="space-y-10">
-          <UploadView onUploadComplete={fetchReports} />
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 mt-6">
-          <AIHealthSummary reports={reports} />
-          <RecentActivity reports={reports} />
-        </div>
-          <div className="space-y-5">
-            <StatsCards reports={reports} />
-            <div className="space-y-5">
-            <div>
+          {/* Graceful Fallback (Prevents ANY blank white screen bug) */}
+          {![
+            "overview",
+            "home",
+            "analyze",
+            "history",
+            "chatbot",
+            "copilot",
+            "profile",
+          ].includes(activeTab) && (
+            <div className="text-center py-16 space-y-3">
+              <h3 className="text-base font-bold text-slate-900 dark:text-white">
+                View Not Found
+              </h3>
+              <p className="text-xs text-slate-500">
+                Returning you to the primary overview.
+              </p>
+              <button
+                onClick={() => setActiveTab("overview")}
+                className="bg-slate-900 text-white text-xs font-semibold px-4 py-2 rounded-xl cursor-pointer"
+              >
+                Return to Overview
+              </button>
             </div>
-
-            <AnalyticsCharts reports={reports} />
-          </div>
-            <DashboardView reports={reports} />
-          </div>
-          
+          )}
         </div>
-      )}
-
-      {activeTab === "history" && (
-        <HistoryView
-          reports={reports}
-          setSelectedReport={setSelectedReport}
-          setActiveTab={setActiveTab}
-        />
-      )}
-
-      {activeTab === "profile" && (
-        <ProfileView reports={reports} />
-      )}
-
-      {activeTab === "chatbot" && (
-        <ChatbotView
-          reportContext={selectedReport}
-          onClearContext={() => setSelectedReport(null)}
-        />
-      )}
-
-    </main>
-
-  </div>
-);
+      </main>
+    </div>
+  );
 }

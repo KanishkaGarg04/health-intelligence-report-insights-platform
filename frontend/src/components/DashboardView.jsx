@@ -1,295 +1,360 @@
-import React from 'react';
-import { AreaChart, Area, ResponsiveContainer, XAxis, YAxis, Tooltip } from 'recharts';
+import {
+  AreaChart,
+  Area,
+  ResponsiveContainer,
+  XAxis,
+  YAxis,
+  Tooltip,
+} from "recharts";
+import {
+  Sparkles,
+  HeartPulse,
+  Ban,
+  Apple,
+  Pill,
+} from "lucide-react";
 
 export default function DashboardView({ reports = [] }) {
-  const totalReportsCount = reports.length || 0;
-
-  const totalInjections = reports.reduce((acc, curr) => {
-    const text = (curr.extractedText || '').toLowerCase();
-    return acc + (text.match(/injection|inj\b/g) || []).length;
-  }, 0);
-
-  const totalSurgeries = reports.reduce((acc, curr) => {
-    const text = (curr.extractedText || '').toLowerCase();
-    return acc + (text.match(/surgery|surgical|operation/g) || []).length;
-  }, 0);
-
   const latestReport = reports[0] || {};
   const insights = latestReport.insights || {};
-  const averageHealthIndex = insights.overallHealth || 68;
+  const averageHealthIndex = insights.overallHealth || 72;
 
-  // Premium, Minimalist Color Coding Matrix
-  const getSeverityStyle = (statusText = '', score = 70) => {
+  // Calm color coding matrix
+  const getSeverityStyle = (statusText = "", score = 70) => {
     const text = statusText.toLowerCase();
-    if (text === 'critical' || text === 'action required' || score < 50) {
+    if (text === "critical" || text === "action required" || score < 50) {
       return {
-        bg: 'bg-rose-50/40',
-        border: 'border-rose-100/60',
-        text: 'text-rose-600',
-        accent: '#f43f5e',
-        badge: 'Critical Action Needed'
+        bg: "bg-rose-50/60 dark:bg-rose-950/40",
+        border: "border-rose-200/80 dark:border-rose-900",
+        text: "text-rose-700 dark:text-rose-300",
+        accent: "#f43f5e",
+        badge: "Attention Required",
       };
     }
-    if (text === 'abnormal' || text === 'warning' || text === 'mild risk' || (score >= 50 && score < 75)) {
+    if (
+      text === "abnormal" ||
+      text === "warning" ||
+      text === "mild risk" ||
+      (score >= 50 && score < 75)
+    ) {
       return {
-        bg: 'bg-amber-50/40',
-        border: 'border-amber-100/60',
-        text: 'text-amber-700',
-        accent: '#b45309',
-        badge: 'Moderate Risk Profile'
+        bg: "bg-amber-50/60 dark:bg-amber-950/40",
+        border: "border-amber-200/80 dark:border-amber-900",
+        text: "text-amber-800 dark:text-amber-300",
+        accent: "#d97706",
+        badge: "Moderate Attention",
       };
     }
     return {
-      bg: 'bg-emerald-50/30',
-      border: 'border-emerald-100/50',
-      text: 'text-emerald-700',
-      accent: '#047857',
-      badge: 'Optimal Health Status'
+      bg: "bg-emerald-50/60 dark:bg-emerald-950/40",
+      border: "border-emerald-200/80 dark:border-emerald-900",
+      text: "text-emerald-700 dark:text-emerald-300",
+      accent: "#0d9488",
+      badge: "Optimal Baseline",
     };
   };
 
-  const severity = getSeverityStyle(latestReport.status || insights.status, averageHealthIndex);
+  const severity = getSeverityStyle(
+    latestReport.status || insights.status,
+    averageHealthIndex
+  );
 
-  const chartData = reports.length > 0
-    ? reports.map((r, i) => ({
-        name: r.insights?.reportType ? r.insights.reportType.split(' ')[0] : `Report ${i + 1}`,
-        value: r.insights?.overallHealth ? (r.insights.overallHealth / 10) : 6.8
-      })).reverse()
-    : [
-        { name: 'CBC', value: 6.5 },
-        { name: 'Thyroid', value: 7.2 },
-        { name: 'Lipid', value: 5.8 },
-        { name: 'Renal', value: 6.8 }
-      ];
+  const chartData =
+    reports.length > 0
+      ? reports
+          .map((r, i) => ({
+            name: r.insights?.reportType
+              ? r.insights.reportType.split(" ")[0]
+              : `Report ${i + 1}`,
+            value: r.insights?.overallHealth
+              ? r.insights.overallHealth / 10
+              : 7.0,
+          }))
+          .reverse()
+      : [
+          { name: "CBC", value: 6.8 },
+          { name: "Thyroid", value: 7.4 },
+          { name: "Lipid", value: 6.2 },
+          { name: "Metabolic", value: 7.2 },
+        ];
 
   return (
-    <div className="space-y-6 max-w-6xl mx-auto pb-20 font-sans antialiased text-slate-700 tracking-tight">
-      
-      {/* ================= SECTION 1: MINIMALIST COUNTER CARDS ================= */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-        
-        {/* Total Reports */}
-        <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-[0_2px_8px_rgba(0,0,0,0.01)] flex items-center justify-between">
-          <div className="space-y-1">
-            <p className="text-xs font-semibold text-slate-400 tracking-normal">Total Dossiers</p>
-            <h2 className="text-3xl font-bold text-slate-900 dark:text-white tracking-tight">
-              {totalReportsCount < 10 ? `0${totalReportsCount}` : totalReportsCount}
-            </h2>
-          </div>
-          <div className="w-11 h-11 bg-slate-50 border border-slate-100 dark:border-slate-700 rounded-xl flex items-center justify-center text-lg text-slate-500 dark:text-slate-300">📋</div>
-        </div>
-
-        {/* Injections */}
-        <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-[0_2px_8px_rgba(0,0,0,0.01)] flex items-center justify-between">
-          <div className="space-y-1">
-            <p className="text-xs font-semibold text-slate-400 tracking-normal">Injections Extracted</p>
-            <h2 className="text-3xl font-bold text-slate-900 dark:text-white tracking-tight">
-              {totalInjections < 10 ? `0${totalInjections}` : totalInjections}
-            </h2>
-          </div>
-          <div className="w-11 h-11 bg-blue-50/50 border border-blue-100/50 rounded-xl flex items-center justify-center text-lg text-blue-500">💉</div>
-        </div>
-
-        {/* Surgeries */}
-        <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-[0_2px_8px_rgba(0,0,0,0.01)] flex items-center justify-between">
-          <div className="space-y-1">
-            <p className="text-xs font-semibold text-slate-400 tracking-normal">Surgical Records</p>
-            <h2 className="text-3xl font-bold text-slate-900 dark:text-white tracking-tight">
-              {totalSurgeries < 10 ? `0${totalSurgeries}` : totalSurgeries}
-            </h2>
-          </div>
-          <div className="w-11 h-11 bg-rose-50/50 border border-rose-100/50 rounded-xl flex items-center justify-center text-lg text-rose-500">🤍</div>
-        </div>
-
-      </div>
-
-      {/* ================= SECTION 2: CHARTS & RADIAL INDEX ================= */}
+    <div className="space-y-6">
+      {/* SECTION 1: Health Index & Overview Trajectory */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
-        
-        {/* Trend Area Chart Container */}
-        <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-[0_2px_8px_rgba(0,0,0,0.01)] lg:col-span-2 space-y-4">
-          <div>
-            <h4 className="font-bold text-base text-slate-900 dark:text-white tracking-tight">Prescription Trajectory Engine</h4>
-            <p className="text-slate-400 text-xs font-normal">Timeline distribution across calculated aggregate markers</p>
+        {/* Trend Area Chart */}
+        <div className="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-200/80 dark:border-slate-700 shadow-2xs lg:col-span-2 space-y-3">
+          <div className="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-slate-700/60">
+            <div>
+              <h4 className="font-bold text-sm text-slate-900 dark:text-white">
+                Health Index Trajectory
+              </h4>
+              <p className="text-slate-400 text-[11px]">
+                Calculated aggregate score across sequential report uploads
+              </p>
+            </div>
+            <span className="text-[11px] font-semibold text-teal-700 dark:text-teal-400 bg-teal-50 dark:bg-teal-950/50 px-2 py-0.5 rounded-md">
+              Score Benchmark: 10.0 Max
+            </span>
           </div>
 
-          <div className="w-full h-48">
+          <div className="w-full h-44">
             <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={chartData} margin={{ top: 5, right: 5, left: -24, bottom: 0 }}>
+              <AreaChart
+                data={chartData}
+                margin={{ top: 5, right: 10, left: -24, bottom: 0 }}
+              >
                 <defs>
-                  <linearGradient id="minimalBlue" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.08}/>
-                    <stop offset="95%" stopColor="#3b82f6" stopOpacity={0.001}/>
+                  <linearGradient id="minimalTeal" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#0d9488" stopOpacity={0.15} />
+                    <stop offset="95%" stopColor="#0d9488" stopOpacity={0.0} />
                   </linearGradient>
                 </defs>
-                <XAxis dataKey="name" stroke="#cbd5e1" fontSize={11} fontWeight={500} tickLine={false} axisLine={false} dy={6} tick={{ fill: '#94a3b8' }} />
-                <YAxis stroke="#cbd5e1" fontSize={11} fontWeight={500} tickLine={false} axisLine={false} dx={-4} domain={[0, 10]} tickCount={6} tickFormatter={(v) => `0${v}`} tick={{ fill: '#94a3b8' }} />
-                <Tooltip contentStyle={{ backgroundColor: '#1e293b', borderRadius: '10px', border: 'none', color: '#fff', fontSize: '12px' }} />
-                <Area type="monotone" dataKey="value" stroke="#3b82f6" strokeWidth={2} fill="url(#minimalBlue)" dot={{ r: 3, fill: '#fff', strokeWidth: 2, stroke: '#3b82f6' }} />
+                <XAxis
+                  dataKey="name"
+                  stroke="#cbd5e1"
+                  fontSize={10}
+                  tickLine={false}
+                  axisLine={false}
+                  dy={4}
+                  tick={{ fill: "#94a3b8" }}
+                />
+                <YAxis
+                  stroke="#cbd5e1"
+                  fontSize={10}
+                  tickLine={false}
+                  axisLine={false}
+                  dx={-4}
+                  domain={[0, 10]}
+                  tickCount={6}
+                  tick={{ fill: "#94a3b8" }}
+                />
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: "#0f172a",
+                    borderRadius: "8px",
+                    border: "none",
+                    color: "#fff",
+                    fontSize: "11px",
+                  }}
+                />
+                <Area
+                  type="monotone"
+                  dataKey="value"
+                  stroke="#0d9488"
+                  strokeWidth={2}
+                  fill="url(#minimalTeal)"
+                  dot={{ r: 3, fill: "#fff", strokeWidth: 2, stroke: "#0d9488" }}
+                />
               </AreaChart>
             </ResponsiveContainer>
           </div>
         </div>
 
         {/* Minimal Health Score Gauge */}
-        <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-[0_2px_8px_rgba(0,0,0,0.01)] flex flex-col items-center justify-center">
-          <p className="text-xs font-semibold text-slate-400 self-start">Condition Baseline</p>
-          
-          <div className="relative flex items-center justify-center my-3">
-            <svg className="w-32 h-32 transform -rotate-90">
-              <circle cx="64" cy="64" r="52" stroke="#f1f5f9" strokeWidth="6" fill="transparent" />
-              <circle 
-                cx="64" 
-                cy="64" 
-                r="52" 
-                stroke={severity.accent} 
-                strokeWidth="6" 
-                fill="transparent" 
-                strokeDasharray={326} 
-                strokeDashoffset={326 - (326 * averageHealthIndex) / 100} 
-                strokeLinecap="round" 
-                style={{ transition: 'stroke-dashoffset 0.8s' }}
+        <div className="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-200/80 dark:border-slate-700 shadow-2xs flex flex-col items-center justify-between">
+          <div className="w-full flex items-center justify-between pb-2 border-b border-slate-100 dark:border-slate-700/60">
+            <span className="text-xs font-bold text-slate-800 dark:text-slate-200">
+              Condition Baseline
+            </span>
+            <span className="text-[10px] text-slate-400">Latest Panel</span>
+          </div>
+
+          <div className="relative flex items-center justify-center my-2">
+            <svg className="w-28 h-28 transform -rotate-90">
+              <circle
+                cx="56"
+                cy="56"
+                r="44"
+                stroke="#f1f5f9"
+                strokeWidth="6"
+                fill="transparent"
+              />
+              <circle
+                cx="56"
+                cy="56"
+                r="44"
+                stroke={severity.accent}
+                strokeWidth="6"
+                fill="transparent"
+                strokeDasharray={276}
+                strokeDashoffset={276 - (276 * averageHealthIndex) / 100}
+                strokeLinecap="round"
+                style={{ transition: "stroke-dashoffset 0.8s ease" }}
               />
             </svg>
             <div className="absolute text-center">
-              <span className="text-2xl font-bold text-slate-900 dark:text-white tracking-tighter">{averageHealthIndex}%</span>
+              <span className="text-xl font-bold tracking-tight text-slate-900 dark:text-white">
+                {averageHealthIndex}%
+              </span>
+              <span className="block text-[9px] text-slate-400 font-medium">Index</span>
             </div>
           </div>
-          <span className={`text-xs font-semibold px-3 py-1 rounded-md ${severity.bg} border ${severity.border} ${severity.text}`}>
+
+          <div
+            className={`text-[11px] font-semibold px-2.5 py-1 rounded-full border ${severity.bg} ${severity.border} ${severity.text}`}
+          >
             {severity.badge}
-          </span>
+          </div>
         </div>
       </div>
 
-      {/* ================= SECTION 3: REASONING & HIGHLIGHT BLOCKS ================= */}
+      {/* SECTION 2: AI Synthesis Summary & Risk Profile Vector */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-        
-        {/* Dynamic Insight Summary Card */}
-        <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-[0_2px_8px_rgba(0,0,0,0.01)] space-y-3">
-          <div className="flex items-center gap-2 border-b border-slate-50 pb-2">
-            <span className="text-sm">✨</span>
-            <h3 className="font-bold text-sm text-slate-900 dark:text-white tracking-normal">AI Synthesis Summary</h3>
+        {/* Dynamic Insight Summary */}
+        <div className="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-200/80 dark:border-slate-700 shadow-2xs space-y-2.5">
+          <div className="flex items-center gap-2 pb-2 border-b border-slate-100 dark:border-slate-700/60">
+            <Sparkles size={15} className="text-teal-600" />
+            <h3 className="font-bold text-xs text-slate-900 dark:text-white uppercase tracking-wider">
+              AI Clinical Summary
+            </h3>
           </div>
-          <p className="text-[13px] text-slate-500 dark:text-slate-300 font-normal leading-relaxed">
-            {insights.summary || "Awaiting file upload execution parameters to systematically populate summary indices."}
+          <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
+            {insights.summary ||
+              "Upload a report to populate automatic clinical summaries and structured metric evaluations."}
           </p>
         </div>
 
-        {/* Dynamic Color-Accented Disease Risk Explainer Block */}
-        <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-[0_2px_8px_rgba(0,0,0,0.01)] space-y-3">
-          <div className="flex items-center gap-2 border-b border-slate-50 pb-2">
-            <span className="text-sm">🔍</span>
-            <h3 className="font-bold text-sm text-slate-900 dark:text-white tracking-normal">Risk Profile Vector</h3>
+        {/* Risk Profile Vector */}
+        <div className="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-200/80 dark:border-slate-700 shadow-2xs space-y-2.5">
+          <div className="flex items-center gap-2 pb-2 border-b border-slate-100 dark:border-slate-700/60">
+            <HeartPulse size={15} className="text-teal-600" />
+            <h3 className="font-bold text-xs text-slate-900 dark:text-white uppercase tracking-wider">
+              Predicted Risk Vector
+            </h3>
           </div>
-          <div className={`p-4 rounded-xl border ${severity.bg} ${severity.border} space-y-1`}>
-            <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">Predicted Tendency:</p>
-            <p className={`text-base font-bold tracking-tight ${severity.text}`}>
-              {insights.diseaseRiskPrediction || "Awaiting complete diagnostic data stream..."}
+          <div
+            className={`p-3.5 rounded-xl border ${severity.bg} ${severity.border} space-y-1`}
+          >
+            <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+              Observed Tendency
             </p>
-            <p className="text-[11px] text-slate-400 font-normal pt-2 border-t border-slate-100 dark:border-slate-700/50 mt-2">
-              *Calculated via zero-shot cross-parameter synthesis. This is an explainability vector, not a diagnosis.
+            <p className={`text-xs font-bold ${severity.text}`}>
+              {insights.diseaseRiskPrediction ||
+                "Standard healthy parameters observed without elevated risk flags."}
+            </p>
+            <p className="text-[10px] text-slate-400 font-normal pt-1.5 border-t border-slate-200/40 dark:border-slate-700/40 mt-1.5">
+              *Calculated for educational review. Always confirm with your physician.
             </p>
           </div>
         </div>
-
       </div>
 
-      {/* ================= SECTION 4: LAB INSIGHTS LAYOUT & MED TRACKER ================= */}
+      {/* SECTION 3: Actionable Directives & Medication Support */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
-        
-        {/* Minimalist Recommendation Matrix */}
-        <div className="lg:col-span-2 bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-[0_2px_8px_rgba(0,0,0,0.01)] space-y-5">
-          <div>
-            <h3 className="font-bold text-base text-slate-900 dark:text-white tracking-tight">Tailored Optimization Directives</h3>
-            <p className="text-xs text-slate-400 font-normal">Personalized clinical changes built directly from parsed biomarkers</p>
-          </div>
-          
-          {/* Section A: Dietary Suggestions */}
-          <div className="space-y-2.5">
-            <div className="text-[11px] font-bold text-slate-400 tracking-wider uppercase flex items-center gap-1.5">
-              <span>🍏</span> Dietary Measures
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pl-1">
-              {insights.dietarySuggestions && insights.dietarySuggestions.length > 0 ? (
-                insights.dietarySuggestions.map((item, idx) => (
-                  <div key={idx} className="bg-slate-50/50 p-3.5 rounded-xl border border-slate-100 dark:border-slate-700/40 text-[13px] space-y-0.5">
-                    <span className="font-bold text-slate-800 dark:text-white block">{item.split(':')[0]}</span>
-                    <span className="text-slate-500 dark:text-slate-300 font-normal block leading-normal">{item.split(':')[1] || "Incorporate cleanly into morning routines."}</span>
-                  </div>
-                ))
-              ) : (
-                <p className="text-[13px] text-slate-400 font-normal italic py-2">No direct food records captured.</p>
-              )}
+        {/* Personalized Recommendations */}
+        <div className="lg:col-span-2 bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-200/80 dark:border-slate-700 shadow-2xs space-y-4">
+          <div className="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-slate-700/60">
+            <div>
+              <h3 className="font-bold text-sm text-slate-900 dark:text-white">
+                Personalized Health Directives
+              </h3>
+              <p className="text-[11px] text-slate-400">
+                Actionable nutritional and lifestyle recommendations extracted from your labs
+              </p>
             </div>
           </div>
 
-          {/* Section B: What to Avoid */}
-          <div className="space-y-2.5 pt-4 border-t border-slate-50">
-            <div className="text-[11px] font-bold text-slate-400 tracking-wider uppercase flex items-center gap-1.5">
-              <span>🚫</span> Clinical Restrictions
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {/* Dietary Directives */}
+            <div className="space-y-2">
+              <div className="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+                <Apple size={13} className="text-teal-600" />
+                <span>Dietary Measures</span>
+              </div>
+              <div className="space-y-2">
+                {insights.dietarySuggestions &&
+                insights.dietarySuggestions.length > 0 ? (
+                  insights.dietarySuggestions.slice(0, 3).map((item, idx) => (
+                    <div
+                      key={idx}
+                      className="bg-slate-50 dark:bg-slate-900/60 p-3 rounded-xl border border-slate-100 dark:border-slate-800 text-xs text-slate-700 dark:text-slate-300"
+                    >
+                      <span className="font-bold block text-slate-900 dark:text-white">
+                        {item.split(":")[0]}
+                      </span>
+                      <span className="text-[11px] text-slate-500 dark:text-slate-400 block mt-0.5 leading-normal">
+                        {item.split(":")[1] || item}
+                      </span>
+                    </div>
+                  ))
+                ) : (
+                  <p className="text-xs text-slate-400 italic">
+                    No custom dietary measures logged.
+                  </p>
+                )}
+              </div>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pl-1">
-              {insights.whatToAvoid && insights.whatToAvoid.length > 0 ? (
-                insights.whatToAvoid.map((item, idx) => (
-                  <div key={idx} className="bg-slate-50/50 p-3.5 rounded-xl border border-slate-100 dark:border-slate-700/40 text-[13px] space-y-0.5">
-                    <span className="font-bold text-slate-800 dark:text-white block">{item.split(':')[0]}</span>
-                    <span className="text-slate-500 dark:text-slate-300 font-normal block leading-normal">{item.split(':')[1] || "Avoid or restrict from standard profiles."}</span>
-                  </div>
-                ))
-              ) : (
-                <p className="text-[13px] text-slate-400 font-normal italic py-2">No specific warnings configured.</p>
-              )}
+
+            {/* Routine & Precautions */}
+            <div className="space-y-2">
+              <div className="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+                <Ban size={13} className="text-rose-500" />
+                <span>Clinical Precautions</span>
+              </div>
+              <div className="space-y-2">
+                {insights.whatToAvoid && insights.whatToAvoid.length > 0 ? (
+                  insights.whatToAvoid.slice(0, 3).map((item, idx) => (
+                    <div
+                      key={idx}
+                      className="bg-slate-50 dark:bg-slate-900/60 p-3 rounded-xl border border-slate-100 dark:border-slate-800 text-xs text-slate-700 dark:text-slate-300"
+                    >
+                      <span className="font-bold block text-slate-900 dark:text-white">
+                        {item.split(":")[0]}
+                      </span>
+                      <span className="text-[11px] text-slate-500 dark:text-slate-400 block mt-0.5 leading-normal">
+                        {item.split(":")[1] || item}
+                      </span>
+                    </div>
+                  ))
+                ) : (
+                  <p className="text-xs text-slate-400 italic">
+                    No specific restrictions identified.
+                  </p>
+                )}
+              </div>
             </div>
           </div>
-
-          {/* Section C: Lifestyle Changes */}
-          <div className="space-y-2.5 pt-4 border-t border-slate-50">
-            <div className="text-[11px] font-bold text-slate-400 tracking-wider uppercase flex items-center gap-1.5">
-              <span>🏃‍♂️</span> Routine Upgrades
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pl-1">
-              {insights.lifestyleChanges && insights.lifestyleChanges.length > 0 ? (
-                insights.lifestyleChanges.map((item, idx) => (
-                  <div key={idx} className="bg-slate-50/50 p-3.5 rounded-xl border border-slate-100 dark:border-slate-700/40 text-[13px] space-y-0.5">
-                    <span className="font-bold text-slate-800 dark:text-white block">{item.split(':')[0]}</span>
-                    <span className="text-slate-500 dark:text-slate-300 font-normal block leading-normal">{item.split(':')[1] || "Adopt to protect metabolic baselines."}</span>
-                  </div>
-                ))
-              ) : (
-                <p className="text-[13px] text-slate-400 font-normal italic py-2">No environmental alterations found.</p>
-              )}
-            </div>
-          </div>
-
         </div>
 
-        {/* Right Sidebar: Minimal Medication Card Stack */}
-        <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-[0_2px_8px_rgba(0,0,0,0.01)] space-y-4">
-          <div className="flex items-center gap-2 border-b border-slate-50 pb-2">
-            <span className="text-sm">💊</span>
-            <h4 className="font-bold text-sm text-slate-900 dark:text-white tracking-normal">Active Medication Support</h4>
+        {/* Medication & Supplement Support */}
+        <div className="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-200/80 dark:border-slate-700 shadow-2xs space-y-3">
+          <div className="flex items-center gap-2 pb-2 border-b border-slate-100 dark:border-slate-700/60">
+            <Pill size={15} className="text-teal-600" />
+            <h4 className="font-bold text-xs text-slate-900 dark:text-white uppercase tracking-wider">
+              Identified Medications
+            </h4>
           </div>
 
-          <div className="space-y-2.5">
+          <div className="space-y-2">
             {insights.medications && insights.medications.length > 0 ? (
               insights.medications.map((pill, idx) => (
-                <div key={idx} className="border border-slate-100 dark:border-slate-700 bg-slate-50/20 p-3.5 rounded-xl space-y-1 hover:border-slate-200 dark:border-slate-600 transition-all">
-                  <div className="flex justify-between items-center text-[10px] font-semibold text-slate-400 tracking-normal">
-                    <span>Compound 0{idx + 1}</span>
-                    <span className="text-blue-600 font-bold">{pill.name}</span>
+                <div
+                  key={idx}
+                  className="border border-slate-100 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-900/40 p-3 rounded-xl space-y-0.5"
+                >
+                  <div className="flex justify-between items-center text-[10px] font-semibold text-slate-400">
+                    <span>Rx Entry 0{idx + 1}</span>
+                    <span className="text-teal-700 dark:text-teal-400 font-bold">
+                      {pill.name}
+                    </span>
                   </div>
-                  <div className="text-base font-bold text-slate-800 dark:text-white tracking-tight">{pill.dose}</div>
-                  <div className="text-xs text-slate-500 dark:text-slate-300 font-normal leading-tight mt-0.5">{pill.instruction}</div>
+                  <div className="text-xs font-bold text-slate-900 dark:text-white">
+                    {pill.dose}
+                  </div>
+                  <div className="text-[11px] text-slate-500 leading-tight">
+                    {pill.instruction}
+                  </div>
                 </div>
               ))
             ) : (
-              <p className="text-xs text-slate-400 font-normal text-center py-8 italic">No pharmaceutical rows systematically parsed.</p>
+              <div className="text-center py-8 text-xs text-slate-400 italic">
+                No active pharmaceutical rows parsed from reports.
+              </div>
             )}
           </div>
         </div>
-
       </div>
-
     </div>
   );
 }

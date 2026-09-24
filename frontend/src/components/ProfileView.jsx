@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import { useRef, useState } from "react";
 import axios from "axios";
 import {
   User,
@@ -8,11 +8,18 @@ import {
   CalendarDays,
   LogOut,
   Camera,
+  CheckCircle2,
+  Clock,
+  Sparkles,
 } from "lucide-react";
+import { Badge, Button } from "./common/UIComponents";
 
 export default function ProfileView({ reports = [] }) {
-  const user = JSON.parse(localStorage.getItem("user") || "{}");
-
+  const [user, setUser] = useState(() => {
+    return JSON.parse(localStorage.getItem("user") || "{}");
+  });
+  const [uploading, setUploading] = useState(false);
+  const [message, setMessage] = useState("");
   const fileInputRef = useRef(null);
 
   const reportCount = reports.length;
@@ -23,20 +30,23 @@ export default function ProfileView({ reports = [] }) {
         .map((word) => word[0])
         .join("")
         .toUpperCase()
+        .slice(0, 2)
     : "U";
 
   const joinedDate = user?.createdAt
-    ? new Date(user.createdAt).toLocaleDateString("en-IN", {
+    ? new Date(user.createdAt).toLocaleDateString("en-US", {
         day: "numeric",
         month: "long",
         year: "numeric",
       })
-    : "Recently Joined";
+    : "Active Member";
 
   const handleProfileUpload = async (e) => {
     const file = e.target.files[0];
-
     if (!file) return;
+
+    setUploading(true);
+    setMessage("");
 
     try {
       const formData = new FormData();
@@ -55,19 +65,19 @@ export default function ProfileView({ reports = [] }) {
         }
       );
 
-      user.profilePic = res.data.profilePic;
-
-      localStorage.setItem("user", JSON.stringify(user));
-
       const updatedUser = {
-  ...user,
-  profilePic: res.data.profilePic,
-};
+        ...user,
+        profilePic: res.data.profilePic,
+      };
 
-localStorage.setItem("user", JSON.stringify(updatedUser));
+      setUser(updatedUser);
+      localStorage.setItem("user", JSON.stringify(updatedUser));
+      setMessage("Profile picture updated successfully.");
     } catch (err) {
-      console.log(err);
-      alert("Upload failed");
+      console.error(err);
+      setMessage("Failed to update profile picture. Please try another image.");
+    } finally {
+      setUploading(false);
     }
   };
 
@@ -78,40 +88,33 @@ localStorage.setItem("user", JSON.stringify(updatedUser));
   };
 
   return (
-    <div className="max-w-3xl mx-auto">
-
+    <div className="max-w-3xl mx-auto space-y-6">
       {/* Header Card */}
-
-      <div className="bg-white dark:bg-slate-800 rounded-3xl shadow-sm border border-slate-100 dark:border-slate-700 p-8">
-
-        <div className="flex flex-col items-center">
-
-          {/* Profile Image */}
-
-          <div className="relative w-28 h-28">
-
+      <div className="bg-white dark:bg-slate-800 rounded-3xl border border-slate-200/80 dark:border-slate-700 p-6 sm:p-8 shadow-2xs">
+        <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6 text-center sm:text-left">
+          {/* Avatar with Camera Overlay */}
+          <div className="relative shrink-0">
             {user?.profilePic ? (
               <img
                 src={user.profilePic}
                 alt="Profile"
-                className="w-28 h-28 rounded-3xl object-cover shadow-lg"
+                className="w-24 h-24 rounded-2xl object-cover border-2 border-slate-200 dark:border-slate-700 shadow-xs"
               />
             ) : (
-              <div className="w-28 h-28 rounded-3xl bg-gradient-to-r from-teal-500 to-blue-600 flex items-center justify-center text-white text-4xl font-bold shadow-lg">
+              <div className="w-24 h-24 rounded-2xl bg-gradient-to-tr from-teal-600 to-blue-600 flex items-center justify-center text-white text-2xl font-bold shadow-xs">
                 {initials}
               </div>
             )}
 
-            {/* Camera Button */}
-
             <button
-              onClick={() => fileInputRef.current.click()}
-              className="absolute -bottom-1 -right-1 bg-blue-600 hover:bg-blue-700 text-white rounded-full p-2 shadow-lg transition"
+              type="button"
+              disabled={uploading}
+              onClick={() => fileInputRef.current?.click()}
+              className="absolute -bottom-1.5 -right-1.5 bg-slate-900 hover:bg-slate-800 dark:bg-teal-600 dark:hover:bg-teal-500 text-white rounded-full p-2 shadow-sm transition cursor-pointer"
+              title="Change Profile Picture"
             >
-              <Camera size={16} />
+              <Camera size={14} />
             </button>
-
-            {/* Hidden File Input */}
 
             <input
               type="file"
@@ -120,134 +123,142 @@ localStorage.setItem("user", JSON.stringify(updatedUser));
               onChange={handleProfileUpload}
               hidden
             />
-
           </div>
 
-          <h1 className="mt-5 text-3xl font-bold text-slate-900 dark:text-white">
-            {user?.name}
-          </h1>
+          {/* User Details */}
+          <div className="space-y-1.5 flex-1">
+            <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2">
+              <h1 className="text-xl md:text-2xl font-bold text-slate-900 dark:text-white">
+                {user?.name || "Patient Account"}
+              </h1>
+              <Badge variant="normal" size="sm">
+                <ShieldCheck size={12} />
+                <span>Verified Account</span>
+              </Badge>
+            </div>
 
-          <p className="text-slate-500 dark:text-slate-300 mt-1">
-            {user?.email}
-          </p>
+            <p className="text-xs text-slate-500 dark:text-slate-400">
+              {user?.email || "patient@example.com"}
+            </p>
 
-          <div className="mt-4 inline-flex items-center gap-2 bg-emerald-50 text-emerald-700 px-4 py-2 rounded-full text-sm font-semibold">
-            <ShieldCheck size={16} />
-            Verified Account
+            <div className="pt-2 flex flex-wrap items-center justify-center sm:justify-start gap-4 text-xs text-slate-400">
+              <div className="flex items-center gap-1.5">
+                <CalendarDays size={13} />
+                <span>Member since {joinedDate}</span>
+              </div>
+            </div>
+
+            {message && (
+              <div className="text-xs text-teal-700 dark:text-teal-400 font-medium pt-1">
+                {message}
+              </div>
+            )}
           </div>
-
         </div>
-
       </div>
 
-      {/* Information */}
-
-      <div className="mt-8 grid md:grid-cols-2 gap-6">
-                {/* Account Information */}
-
-        <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 p-6">
-
-          <h2 className="text-lg font-bold mb-5">
-            Account Information
+      {/* Account Details & Platform History */}
+      <div className="grid md:grid-cols-2 gap-5">
+        {/* Account Information Card */}
+        <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200/80 dark:border-slate-700 p-6 shadow-2xs space-y-4">
+          <h2 className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider pb-2 border-b border-slate-100 dark:border-slate-700/60">
+            Account Specifications
           </h2>
 
-          <div className="space-y-5">
-
+          <div className="space-y-3.5 text-xs">
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3 text-slate-500 dark:text-slate-300">
-                <User size={18} />
-                <span>Name</span>
-              </div>
-
-              <span className="font-semibold text-slate-800 dark:text-white">
+              <span className="text-slate-400 flex items-center gap-2">
+                <User size={14} />
+                <span>Full Name</span>
+              </span>
+              <span className="font-semibold text-slate-900 dark:text-white">
                 {user?.name}
               </span>
             </div>
 
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3 text-slate-500 dark:text-slate-300">
-                <Mail size={18} />
-                <span>Email</span>
-              </div>
-
-              <span className="font-semibold text-slate-800 dark:text-white break-all">
+              <span className="text-slate-400 flex items-center gap-2">
+                <Mail size={14} />
+                <span>Verified Email</span>
+              </span>
+              <span className="font-semibold text-slate-900 dark:text-white truncate max-w-[180px]">
                 {user?.email}
               </span>
             </div>
 
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3 text-slate-500 dark:text-slate-300">
-                <CalendarDays size={18} />
-                <span>Member Since</span>
-              </div>
-
-              <span className="font-semibold text-slate-800 dark:text-white">
-                {joinedDate}
+              <span className="text-slate-400 flex items-center gap-2">
+                <ShieldCheck size={14} />
+                <span>Authentication State</span>
+              </span>
+              <span className="text-emerald-600 font-semibold flex items-center gap-1">
+                <CheckCircle2 size={13} />
+                <span>Token Active</span>
               </span>
             </div>
-
           </div>
-
         </div>
 
-        {/* Statistics */}
-
-        <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 p-6">
-
-          <h2 className="text-lg font-bold mb-5">
-            Statistics
+        {/* Platform Engagement Statistics */}
+        <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200/80 dark:border-slate-700 p-6 shadow-2xs space-y-4">
+          <h2 className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider pb-2 border-b border-slate-100 dark:border-slate-700/60">
+            Diagnostic History Metrics
           </h2>
 
-          <div className="space-y-5">
-
+          <div className="space-y-3.5 text-xs">
             <div className="flex items-center justify-between">
-
-              <div className="flex items-center gap-3 text-slate-500 dark:text-slate-300">
-                <FileBarChart size={18} />
-                <span>Reports Analyzed</span>
-              </div>
-
-              <span className="bg-blue-50 text-blue-600 font-bold px-3 py-1 rounded-lg">
+              <span className="text-slate-400 flex items-center gap-2">
+                <FileBarChart size={14} />
+                <span>Total Documents Analyzed</span>
+              </span>
+              <span className="font-bold text-slate-900 dark:text-white bg-slate-100 dark:bg-slate-700 px-2.5 py-0.5 rounded-md">
                 {reportCount}
               </span>
-
             </div>
 
             <div className="flex items-center justify-between">
-
-              <div className="flex items-center gap-3 text-slate-500 dark:text-slate-300">
-                <ShieldCheck size={18} />
-                <span>Account Status</span>
-              </div>
-
-              <span className="text-emerald-600 font-semibold">
-                Active
+              <span className="text-slate-400 flex items-center gap-2">
+                <Clock size={14} />
+                <span>Archive Retention</span>
               </span>
-
+              <span className="font-semibold text-slate-900 dark:text-white">
+                Persistent Database
+              </span>
             </div>
 
+            <div className="flex items-center justify-between">
+              <span className="text-slate-400 flex items-center gap-2">
+                <Sparkles size={14} />
+                <span>AI Clinical Copilot</span>
+              </span>
+              <span className="text-teal-700 dark:text-teal-400 font-semibold">
+                Available
+              </span>
+            </div>
           </div>
+        </div>
+      </div>
 
+      {/* Account Actions / Logout */}
+      <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200/80 dark:border-slate-700 p-6 shadow-2xs flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div>
+          <h3 className="text-sm font-bold text-slate-900 dark:text-white">
+            End Session
+          </h3>
+          <p className="text-xs text-slate-400">
+            Securely sign out of your profile and remove cached authentication tokens.
+          </p>
         </div>
 
-      </div>
-
-      {/* Logout */}
-
-      <div className="mt-8">
-
-        <button
+        <Button
+          variant="danger"
+          size="sm"
           onClick={handleLogout}
-          className="w-full bg-gradient-to-r from-red-500 to-rose-600 text-white py-4 rounded-2xl font-semibold hover:opacity-95 transition-all duration-300 shadow-md hover:shadow-lg"
+          icon={LogOut}
         >
-          <div className="flex justify-center items-center gap-2">
-            <LogOut size={18} />
-            Logout
-          </div>
-        </button>
-
+          Sign Out of Account
+        </Button>
       </div>
-
     </div>
   );
 }

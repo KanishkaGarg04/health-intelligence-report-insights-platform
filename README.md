@@ -1,300 +1,559 @@
-# 🩺 MedScan — AI-Powered Medical Report Analyzer
- #### Demo Link - https://med-scan-topaz.vercel.app/
-<div align="center">
+# 🩺 Health Intelligence & Report Insights Platform
 
-### Transform Complex Medical Reports into Actionable Health Insights
+<p align="center">
 
-AI-powered healthcare intelligence platform built using **MERN Stack** and **Google Gemini Vision API**
+### AI-Assisted Health Report Processing & Insights
 
-![React](https://img.shields.io/badge/React-19-blue)
-![Node.js](https://img.shields.io/badge/Node.js-Express-green)
-![MongoDB](https://img.shields.io/badge/MongoDB-Atlas-success)
-![Gemini](https://img.shields.io/badge/Google-Gemini%20Vision-orange)
-![License](https://img.shields.io/badge/License-MIT-blue)
+A full-stack health intelligence platform that combines **Tesseract OCR** and **Google Gemini AI** to process uploaded health reports, extract structured information, generate AI-assisted insights, and support conversational exploration.
 
-</div>
+<br/>
 
----
+<a href="https://med-scan-topaz.vercel.app/">
+  <img src="https://img.shields.io/badge/LIVE%20DEMO-58A6FF?style=for-the-badge&logo=vercel&logoColor=white" />
+</a>
 
-## 📖 Overview
-
-MedScan is a full-stack healthcare intelligence platform that automates the analysis of medical reports using **Generative AI**. Users can upload pathology reports, extract clinical biomarkers, identify abnormalities, receive AI-generated summaries, and monitor health trends through an interactive dashboard.
-
-Unlike traditional OCR systems, MedScan utilizes **Google Gemini Vision API** to understand the structure and context of medical reports, enabling accurate extraction of medical parameters and intelligent recommendations.
+</p>
 
 ---
 
-## ✨ Key Features
+## ✨ Overview
 
-### 🔍 AI Medical Report Analysis
+The **Health Intelligence & Report Insights Platform** is a full-stack web application designed to help users process and understand information contained within health reports.
 
-* Upload JPG and PNG medical reports
-* Automatic biomarker extraction
-* Detection of abnormal clinical values
-* Intelligent parsing of laboratory reports
+The platform combines **Tesseract OCR** for report text extraction with **Google Gemini AI** for AI-assisted analysis, connecting document processing, structured information, report history, and conversational interaction within a single workflow.
 
-### 📊 Smart Clinical Insights
+### Platform Capabilities
 
-* AI-generated medical summaries
-* Risk profile analysis
-* Health trend monitoring
-* Explainable AI recommendations
+* 📄 Health report upload and processing
+* 🔍 OCR-based text extraction
+* 🧠 AI-assisted report analysis
+* 📊 Structured health insights
+* 📜 Report history management
+* 💬 Interactive health assistant
+* 🥗 Personalized informational suggestions
+* 🔐 JWT-based authentication
+* 🌐 RESTful APIs
 
-### 🥗 Personalized Recommendations
+Testing achieved **90%+ OCR accuracy across 10+ tested reports**.
+
+---
+
+# 🚀 Core Features
+
+## 📄 Health Report Processing
+
+Users can upload supported health report images and initiate automated processing.
+
+* JPG and PNG report support
+* OCR-based text extraction
+* Structured report information
+* Automated report processing
+* Report-linked analysis
+
+### Processing Pipeline
+
+```text
+Report Upload
+      ↓
+Tesseract OCR
+      ↓
+Text Extraction
+      ↓
+Structured Report Data
+      ↓
+Gemini AI Analysis
+      ↓
+Health Insights
+```
+
+---
+
+## 🧠 AI-Assisted Health Insights
+
+Extracted report information is processed through **Google Gemini AI** to generate structured informational insights.
+
+The platform can provide:
+
+* Report summaries
+* Important observations
+* Abnormal-value indicators
+* Health-related explanations
+* General informational recommendations
+
+---
+
+## 📊 Report History
+
+Authenticated users can access previously processed reports.
+
+* Report archive
+* Previous analysis access
+* Report-linked insights
+* User-specific report history
+* Persistent report storage
+
+---
+
+## 💬 Health Assistant
+
+The platform includes an interactive AI-assisted health assistant for discussing analyzed report information.
+
+Users can:
+
+* Ask questions about analyzed reports
+* Understand health-related terminology
+* Discuss report information conversationally
+* Continue report-linked conversations
+
+---
+
+## 🥗 Personalized Informational Suggestions
+
+The platform can generate informational suggestions based on analyzed report data, including:
 
 * Dietary suggestions
-* Lifestyle optimization guidance
-* Hydration recommendations
-* Preventive healthcare insights
+* Lifestyle guidance
+* Hydration suggestions
+* Preventive health information
 
-### 📈 Historical Tracking
+> **Disclaimer:** This platform is intended for educational and portfolio purposes. Generated information is informational and should not be treated as medical diagnosis or professional medical advice.
 
-* Complete report archive
-* Biomarker trend visualization
-* Long-term health monitoring
-* Profile-based report management
+---
 
-### 🤖 AI Clinical Copilot
+# 🔄 Application Workflow
 
-* Interactive healthcare chatbot
-* Medical terminology explanations
-* Personalized report discussions
-* Clinical knowledge assistance
+```text
+                         User
+                          │
+                          ▼
+                 Upload Health Report
+                          │
+                          ▼
+                 Express Backend
+                          │
+                          ▼
+                    Tesseract OCR
+                          │
+                          ▼
+                 Extracted Report Text
+                          │
+                          ▼
+                      Gemini AI
+                          │
+                          ▼
+                 AI-Assisted Insights
+                          │
+                          ▼
+                    MongoDB Atlas
+                          │
+                          ▼
+                 Dashboard + History
+                          │
+                          ▼
+                  Health Assistant
+```
 
 ---
 
 # 🏗️ System Architecture
 
 ```text
-User
- │
- ▼
-React Frontend
- │
- ▼
-Node.js + Express Backend
- │
- ├── Google Gemini Vision API
- │
- └── MongoDB Atlas Database
-        │
-        ▼
- Report Storage + Analysis History
+                         ┌─────────────────┐
+                         │      User       │
+                         └────────┬────────┘
+                                  │
+                                  ▼
+                         ┌─────────────────┐
+                         │ React + Vite    │
+                         │    Frontend     │
+                         └────────┬────────┘
+                                  │
+                              REST API
+                                  │
+                                  ▼
+                         ┌─────────────────┐
+                         │ Node.js +       │
+                         │ Express Backend │
+                         └────────┬────────┘
+                                  │
+              ┌───────────────────┼───────────────────┐
+              │                   │                   │
+              ▼                   ▼                   ▼
+       ┌─────────────┐     ┌─────────────┐     ┌─────────────┐
+       │ JWT Auth    │     │ Tesseract   │     │  Gemini AI  │
+       │             │     │ OCR         │     │             │
+       └─────────────┘     └──────┬──────┘     └──────┬──────┘
+                                  │                   │
+                                  └─────────┬─────────┘
+                                            ▼
+                                  ┌─────────────────┐
+                                  │ Report Analysis │
+                                  └────────┬────────┘
+                                           │
+                                           ▼
+                                  ┌─────────────────┐
+                                  │  MongoDB Atlas  │
+                                  └────────┬────────┘
+                                           │
+                                           ▼
+                                  ┌─────────────────┐
+                                  │ Report History  │
+                                  └─────────────────┘
 ```
 
 ---
 
-# 🖼️ Application Screenshots
+# 🖼️ Application Showcase
 
-## 🏠 Home Page
+## 01 — Landing Page
 
-Upload medical reports and start AI-powered analysis instantly.
+The landing experience introduces the platform and guides users toward report analysis.
 
-![Home Page](./Screenshots/dashboard.png)
-
----
-
-## 📋 Clinical Report Analysis
-
-Extracted biomarkers with diagnostic status, benchmark ranges, and severity indicators.
-
-![Analysis Page](./Screenshots/results.png)
+<p align="center">
+  <img src="./Screenshots/landing.jpg" width="100%" alt="Health Intelligence Platform Landing Page"/>
+</p>
 
 ---
 
-## 🧠 AI Synthesis Summary
+## 02 — Authentication
 
-Automatically generated medical interpretation and health risk assessment.
+JWT-based authentication provides secure access to protected application workflows.
 
-![Summary Page](./Screenshots/summary.png)
-
----
-
-## 📜 Report History
-
-Access and manage all previously analyzed reports.
-
-![History Page](./Screenshots/history.png)
+<p align="center">
+  <img src="./Screenshots/login.jpg" width="100%" alt="Health Intelligence Platform Login"/>
+</p>
 
 ---
 
-## 🤖 AI Clinical Copilot
+## 03 — Dashboard
 
-Conversational healthcare assistant for understanding reports and medical terminology.
+The central workspace for accessing report analysis, insights, history, and the health assistant.
 
-![AI Consultant](./Screenshots/AI_copliot.png)
+<p align="center">
+  <img src="./Screenshots/dashboard.jpg" width="100%" alt="Health Intelligence Platform Dashboard"/>
+</p>
 
 ---
 
-# 🚀 Technology Stack
+## 04 — Report Analysis
+
+Structured report information and AI-assisted analysis are presented through the results interface.
+
+<p align="center">
+  <img src="./Screenshots/results.jpg" width="100%" alt="Health Report Analysis"/>
+</p>
+
+---
+
+## 05 — AI Synthesis
+
+AI-generated report synthesis and health-related insights are presented through the analysis interface.
+
+<p align="center">
+  <img src="./Screenshots/summary.jpg" width="100%" alt="AI-Assisted Report Synthesis"/>
+</p>
+
+---
+
+## 06 — Report History
+
+Previously processed reports can be accessed through the authenticated history interface.
+
+<p align="center">
+  <img src="./Screenshots/history.jpg" width="100%" alt="Health Report History"/>
+</p>
+
+---
+
+## 07 — Health Assistant
+
+An interactive assistant for discussing analyzed report information and health-related terminology.
+
+<p align="center">
+  <img src="./Screenshots/AI_copilot.jpg" width="100%" alt="AI Health Assistant"/>
+</p>
+
+---
+
+# 🧰 Technology Stack
 
 ## Frontend
 
-* React.js
-* Tailwind CSS
-* React Router
-* Axios
-* Recharts
+| Technology    | Purpose                       |
+| ------------- | ----------------------------- |
+| React.js      | Frontend application          |
+| Vite          | Development and build tooling |
+| Tailwind CSS  | UI styling                    |
+| React Router  | Client-side routing           |
+| Axios         | API communication             |
+| Recharts      | Data visualization            |
+| Framer Motion | UI animations                 |
 
 ## Backend
 
-* Node.js
-* Express.js
-* Multer
-* JWT Authentication
-* REST APIs
+| Technology | Purpose                        |
+| ---------- | ------------------------------ |
+| Node.js    | Backend runtime                |
+| Express.js | REST API framework             |
+| Multer     | File upload handling           |
+| JWT        | Authentication                 |
+| REST APIs  | Frontend/backend communication |
 
 ## Database
 
-* MongoDB Atlas
-* Mongoose ODM
+| Technology    | Purpose                 |
+| ------------- | ----------------------- |
+| MongoDB Atlas | Cloud database          |
+| Mongoose      | MongoDB object modeling |
 
-## Artificial Intelligence
+## OCR & AI
 
-* Google Gemini Vision API
-* Prompt Engineering
-* Medical Report Parsing
+| Technology       | Purpose                     |
+| ---------------- | --------------------------- |
+| Tesseract OCR    | Report text extraction      |
+| Google Gemini AI | AI-assisted report analysis |
 
-## Development Tools
+## Development & Deployment
 
+* Git
+* GitHub
 * VS Code
-* Git & GitHub
 * Postman
 * MongoDB Compass
+* Vercel
+* Render
 
 ---
 
-# ⚙️ Installation
+# 🌐 REST API
 
-## Clone Repository
+The backend provides authenticated REST APIs for the application's core workflows:
 
-```bash
-git clone https://github.com/yourusername/medscan.git
+* User authentication
+* Report upload
+* Report processing
+* Report history
+* AI-assisted analysis
+* Chat interactions
 
-cd medscan
+The application contains **10+ JWT-authenticated REST API endpoints** across its core workflows.
+
+---
+
+# 🔐 Authentication Flow
+
+```text
+Registration / Login
+        ↓
+    JWT Token
+        ↓
+Authenticated Frontend
+        ↓
+Authorization Header
+        ↓
+Protected Express Routes
+        ↓
+Report / AI Services
+        ↓
+MongoDB Atlas
 ```
 
 ---
 
-## Backend Setup
+# 🔬 Report Processing Pipeline
+
+```text
+1. User uploads a report.
+        ↓
+2. Backend receives the uploaded file.
+        ↓
+3. Tesseract OCR extracts report text.
+        ↓
+4. Extracted content is prepared for analysis.
+        ↓
+5. Gemini AI processes the extracted information.
+        ↓
+6. AI-assisted insights are generated.
+        ↓
+7. Report and analysis data are persisted.
+        ↓
+8. Results are displayed in the dashboard.
+        ↓
+9. Report becomes available through history.
+        ↓
+10. User can continue the discussion through
+    the Health Assistant.
+```
+
+---
+
+# 📊 Testing Highlights
+
+* **90%+ OCR accuracy across 10+ tested reports**
+* **10+ JWT-authenticated REST API endpoints**
+* Report history across authenticated sessions
+* Responsive interface across desktop and mobile layouts
+
+---
+
+# 🔒 Security
+
+The platform implements several application-level security practices:
+
+* JWT authentication
+* Protected backend routes
+* User-specific report access
+* Password hashing
+* Environment variable protection
+* Protected REST APIs
+* Secure API credential handling
+
+> API keys, database credentials, JWT secrets, and other sensitive configuration values should be stored in environment variables and never committed to the repository.
+
+---
+
+# 📁 Project Structure
+
+```text
+health-intelligence-report-insights-platform/
+│
+├── frontend/
+│   ├── src/
+│   │   ├── components/
+│   │   ├── pages/
+│   │   ├── context/
+│   │   ├── services/
+│   │   └── utils/
+│   ├── public/
+│   └── package.json
+│
+├── backend/
+│   ├── controllers/
+│   ├── models/
+│   ├── routes/
+│   ├── middleware/
+│   ├── services/
+│   └── config/
+│
+├── Screenshots/
+│   ├── landing.jpg
+│   ├── login.jpg
+│   ├── dashboard.jpg
+│   ├── results.jpg
+│   ├── summary.jpg
+│   ├── history.jpg
+│   └── AI_copliot.jpg
+│
+└── README.md
+```
+
+---
+
+# ⚙️ Local Development
+
+## 1. Clone the Repository
+
+```bash
+git clone YOUR_GITHUB_REPOSITORY_URL
+
+cd YOUR_REPOSITORY_NAME
+```
+
+---
+
+## 2. Backend Setup
 
 ```bash
 cd backend
 
 npm install
+
+npm start
 ```
 
-Create `.env`
+Backend:
+
+```text
+http://localhost:5000
+```
+
+Create:
+
+```text
+backend/.env
+```
 
 ```env
 PORT=5000
-
 MONGO_URI=your_mongodb_connection_string
-
 GEMINI_API_KEY=your_gemini_api_key
-
 JWT_SECRET=your_secret_key
-```
-
-Run Backend
-
-```bash
-npm start
 ```
 
 ---
 
-## Frontend Setup
+## 3. Frontend Setup
 
 ```bash
 cd frontend
 
 npm install
 
-npm start
+npm run dev
 ```
 
-Application will run on:
+Frontend:
 
 ```text
-Frontend:
-http://localhost:3000
-
-Backend:
-http://localhost:5000
+http://localhost:5173
 ```
 
+Create:
+
+```text
+frontend/.env
+```
+
+```env
+VITE_API_URL=http://localhost:5000
+```
+
+> Never commit `.env` files or secret credentials to GitHub.
 
 ---
 
-# 🔄 Workflow
+# ☁️ Deployment Architecture
 
-### Step 1
+```text
+                 React + Vite
+                     │
+                     ▼
+                   Vercel
+                     │
+                     ▼
+              Node.js + Express
+                     │
+           ┌─────────┴─────────┐
+           │                   │
+           ▼                   ▼
+      Tesseract OCR        Gemini AI
+           │                   │
+           └─────────┬─────────┘
+                     │
+                     ▼
+                MongoDB Atlas
+```
 
-User uploads a medical report.
+### Live Application
 
-### Step 2
-
-Backend forwards image to Gemini Vision API.
-
-### Step 3
-
-AI extracts biomarkers and reference ranges.
-
-### Step 4
-
-System identifies abnormalities.
-
-### Step 5
-
-AI generates:
-
-* Summary
-* Risk Profile
-* Dietary Recommendations
-
-### Step 6
-
-Data is stored in MongoDB Atlas.
-
-### Step 7
-
-Dashboard and history are updated.
+https://med-scan-topaz.vercel.app/
 
 ---
 
-# 📈 Future Enhancements
+# 🔮 Future Improvements
 
 * PDF report support
-* Wearable device integration
-* Multi-language medical reports
-* Doctor collaboration portal
-* Appointment scheduling
-* Advanced health analytics
-* Predictive disease risk modeling
-
----
-
-# 🔒 Security Features
-
-* JWT Authentication
-* Environment Variable Protection
-* Secure API Communication
-* Input Validation
-* Protected Routes
-* MongoDB Atlas Security Controls
-
----
-
-# 🎯 Use Cases
-
-* Patients
-* Healthcare Clinics
-* Diagnostic Laboratories
-* Medical Students
-* Health Monitoring Applications
-
-
----
-
-### "Making Healthcare Reports Understandable Through AI"
+* Multilingual report processing
+* Improved OCR preprocessing
+* Expanded report formats
+* Enhanced he

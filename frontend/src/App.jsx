@@ -1,29 +1,30 @@
 import { Routes, Route, Navigate } from "react-router-dom";
 
+import Landing from "./pages/Landing";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Dashboard from "./components/Dashboard";
 
 export default function App() {
+  const token = localStorage.getItem("token");
 
-    const token = localStorage.getItem("token");
+  return (
+    <Routes>
+      {/* Public Landing & Overview Page */}
+      <Route path="/" element={<Landing />} />
 
-    return (
-        <Routes>
+      {/* Main Authenticated Dashboard */}
+      <Route
+        path="/dashboard"
+        element={token ? <Dashboard /> : <Navigate to="/login" replace />}
+      />
 
-            <Route
-                path="/"
-                element={
-                    token
-                        ? <Dashboard />
-                        : <Navigate to="/login" />
-                }
-            />
+      {/* Authentication Pages */}
+      <Route path="/login" element={<Login />} />
+      <Route path="/register" element={<Register />} />
 
-            <Route path="/login" element={<Login />} />
-
-            <Route path="/register" element={<Register />} />
-
-        </Routes>
-    );
+      {/* Catch-all redirect */}
+      <Route path="*" element={<Navigate to="/" replace />} />
+    </Routes>
+  );
 }
